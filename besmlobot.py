@@ -4,20 +4,21 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
+
 app = Flask(__name__)
 
-line_bot_api = LineBotApi('BCm52q9Tinn9O8X/InnaEO2n5RC1wHHBuMCV7CJJCGxW4xFfEeUnR5LJQ1lBfOgkaCOGlOeeSJFQTq8CCRU6b0elB9TVq4N1oe0LMMs8Q5O6b92FeAKL+WTclw4RBbpOyBCWNuc114vZ0DXvX5JeXgdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('6c317257b7cb75fce536facab0c74fdb')
+# LINE 聊天機器人的基本資料
+line_bot_api = LineBotApi('聊天機器人的 Chennel access token')
+handler = WebhookHandler('聊天機器人的 Channel secret')
 
+# 接收 LINE 的資訊
 @app.route("/callback", methods=['POST'])
 def callback():
-
-    # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
+
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
-
-    # handle webhook body
 
     try:
         handler.handle(body, signature)
@@ -25,6 +26,16 @@ def callback():
         abort(400)
 
     return 'OK'
+
+# 學你說話
+@handler.add(MessageEvent, message=TextMessage)
+def echo(event):
+    
+    if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=event.message.text)
+        )
 
 if __name__ == "__main__":
     app.run()
